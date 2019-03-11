@@ -7,11 +7,12 @@ import urlparse
 
 import requests
 
-HOST = "rabbitmq-host"
-USER = "rabbituser"
-PASSWORD = "rabbitpassword"
-VHOST = "/"
-SYNC_TIMEOUT = 60
+HOST = "rabbitmq-host"       # hostname of a cluster node that has the management plugin enabled
+VHOST = "/"                  # the vhost in the cluster, to connect to
+USER = "rabbituser"          # username with enough permissions to create policies on the vhost
+PASSWORD = "rabbitpassword"  # the password for this user
+
+SYNC_TIMEOUT = 60            # the number of seconds to wait for a queue to sync/move to a new node
 
 
 class RabbitQueue(object):
