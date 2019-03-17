@@ -2,22 +2,22 @@ import json
 import logging
 import sys
 import time
-import urllib
-
-try:
-    import urlparse
-except ImportError:
-    import urllib.parse as urlparse
-
 
 import requests
 
-HOST = "rabbitmq-host"       # hostname of a cluster node that has the management plugin enabled
-VHOST = "/"                  # the vhost in the cluster, to connect to
-USER = "rabbituser"          # username with enough permissions to create policies on the vhost
+# python 2.7/3.7 compatibility
+try:
+    from urllib import quote
+    from urlparse import urljoin
+except ImportError:
+    from urllib.parse import quote, urljoin
+
+HOST = "rabbitmq-host"  # hostname of a cluster node that has the management plugin enabled
+VHOST = "/"  # the vhost in the cluster, to connect to
+USER = "rabbituser"  # username with enough permissions to create policies on the vhost
 PASSWORD = "rabbitpassword"  # the password for this user
 
-SYNC_TIMEOUT = 60            # the number of seconds to wait for a queue to sync/move to a new node
+SYNC_TIMEOUT = 60  # the number of seconds to wait for a queue to sync/move to a new node
 
 
 class RabbitQueue(object):
@@ -40,7 +40,7 @@ def _get_nodes():
     returns the list of nodes in the cluster
     :rtype: list[dict]
     """
-    url = urlparse.urljoin(_base_url, 'nodes')
+    url = urljoin(_base_url, 'nodes')
     response = requests.get(url)
     if not response.ok:
         error = "Can't get nodes. error: {}".format(response.content)
@@ -57,10 +57,7 @@ def _get_queue(queue_name):
     :param str queue_name: the name of the queue to get
     :rtype: dict
     """
-    url = urlparse.urljoin(_base_url, 'queues/{vhost}/{name}'.format(
-        vhost=urllib.quote_plus(VHOST),
-        name=urllib.quote_plus(queue_name)
-    ))
+    url = urljoin(_base_url, 'queues/{vhost}/{name}'.format(vhost=quote(VHOST), name=quote(queue_name)))
     response = requests.get(url)
     if not response.ok:
         error = "Can't get queue. error: {}".format(response.content)
@@ -76,7 +73,7 @@ def _get_queues():
 
     :rtype: list[dict]
     """
-    url = urlparse.urljoin(_base_url, 'queues/{vhost}'.format(vhost=urllib.quote_plus(VHOST)))
+    url = urljoin(_base_url, 'queues/{vhost}'.format(vhost=quote(VHOST)))
     response = requests.get(url)
     if not response.ok:
         error = "Can't get queues. error: {}".format(response.content)
@@ -95,16 +92,13 @@ def _create_policy(policy_name, pattern, priority, definition):
     :param int priority: the priority of the policy
     :param dict definition: the policy definition
     """
-    url = urlparse.urljoin(_base_url, 'policies/{vhost}/{name}'.format(
-       vhost=urllib.quote_plus(VHOST),
-       name=urllib.quote_plus(policy_name)
-    ))
+    url = urljoin(_base_url, 'policies/{vhost}/{name}'.format(vhost=quote(VHOST), name=quote(policy_name)))
 
     data = {
-       "pattern": pattern,
-       "priority": priority,
-       "apply-to": "queues",
-       "definition": definition
+        "pattern": pattern,
+        "priority": priority,
+        "apply-to": "queues",
+        "definition": definition
     }
 
     response = requests.put(url, data=json.dumps(data), headers={'Content-Type': 'application/json'})
@@ -120,10 +114,7 @@ def _delete_policy(policy_name):
 
     :param str policy_name: the policy name
     """
-    url = urlparse.urljoin(_base_url, 'policies/{vhost}/{name}'.format(
-        vhost=urllib.quote_plus(VHOST),
-        name=urllib.quote_plus(policy_name)
-    ))
+    url = urljoin(_base_url, 'policies/{vhost}/{name}'.format(vhost=quote(VHOST), name=quote(policy_name)))
 
     response = requests.delete(url)
     if not response.ok:
@@ -138,10 +129,7 @@ def _sync_queue(queue_name):
 
     :param str queue_name: the queue name
     """
-    url = urlparse.urljoin(_base_url, 'queues/{vhost}/{name}/actions'.format(
-        vhost=urllib.quote_plus(VHOST),
-        name=urllib.quote_plus(queue_name)
-    ))
+    url = urljoin(_base_url, 'queues/{vhost}/{name}/actions'.format(vhost=quote(VHOST), name=quote(queue_name)))
 
     data = {'action': 'sync'}
 
@@ -241,7 +229,8 @@ def calc_new_dests():
 
             source_queues_count = len(queues_on_node[source_node])
             destination_queues_count = len(queues_on_node[destination_node]) + \
-                                       len(new_destination_nodes[destination_node])  # queues already assigned to be moved to destination node
+                                       len(new_destination_nodes[
+                                               destination_node])  # queues already assigned to be moved to destination node
 
             num_of_queues_to_move = max(0, min(source_queues_count - avg, (destination_queues_count - avg) * -1))
 
