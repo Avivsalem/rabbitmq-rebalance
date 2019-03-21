@@ -163,7 +163,7 @@ def _get_queue_object(queue_json):
     q_name = queue_json['name']
     q_master = queue_json['node']
     q_slaves = queue_json.get('synchronised_slave_nodes', [])
-    q_bytes = queue_json['message_bytes']
+    q_bytes = queue_json.get('message_bytes', 0)
     return RabbitQueue(q_name, q_master, q_slaves, q_bytes)
 
 
