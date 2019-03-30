@@ -216,7 +216,7 @@ def calc_new_dests():
         avg = avg + len(queues)
         logging.info("Found {} queues on host {}".format(len(queues), host))
     avg = int(math.ceil(avg / len(queues_on_node)))
-    logging.info("Each node should have {} queues".format(avg))
+    logging.info("Each node should have at most {} queues".format(avg))
 
     new_destination_nodes = {}
     for source_node in queues_on_node:
