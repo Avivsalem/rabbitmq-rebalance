@@ -1,5 +1,6 @@
 import json
 import logging
+import math
 import sys
 import time
 
@@ -210,11 +211,11 @@ def calc_new_dests():
         queues_on_node[queue.master_node].append(queue)
 
     # calc the avg amount of queues each node should have
-    avg = 0
+    avg = 0.0
     for host, queues in queues_on_node.items():
         avg = avg + len(queues)
         logging.info("Found {} queues on host {}".format(len(queues), host))
-    avg = int(avg / len(queues_on_node))
+    avg = int(math.ceil(avg / len(queues_on_node)))
     logging.info("Each node should have {} queues".format(avg))
 
     new_destination_nodes = {}
