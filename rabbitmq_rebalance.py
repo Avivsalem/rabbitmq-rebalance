@@ -254,7 +254,7 @@ def calc_new_dests():
                 # if we still need to move queues, move the remaining amount
                 if num_of_queues_to_move > 0:
                     for i in range(num_of_queues_to_move):
-                        new_destination_nodes[destination_node].append(queues_on_node[source_node].pop())
+                        new_destination_nodes[destination_node].append(queues_on_node[source_node].pop(0))
 
     return new_destination_nodes
 
